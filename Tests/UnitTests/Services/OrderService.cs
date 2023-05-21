@@ -86,29 +86,7 @@ namespace Tests.UnitTests.Services
         public async Task CreateOrderAsync_ValidOrderForCreation_ReturnsCreatedOrder()
         {
             // Arrange
-            var orderForCreationDto = new OrderForCreationDto
-            {
-                CustomerId = "VIMET",
-                EmployeeId = 1,
-                Freight = 1,
-                RequiredDate = DateTime.Now,
-                ShipAddress = "Test",
-                ShipCity = "Test",
-                ShipCountry = "Test",
-                ShipName = "Test",
-                ShipPostalCode = "Test",
-                ShipRegion = "Test",
-                ShipVia = 1,
-
-                OrderDetails = new List<OrderDetailForCreationDto>
-                {
-                    new OrderDetailForCreationDto
-                    {
-                        ProductId = 1,
-                        Quantity = 1
-                    }
-                }
-            };
+            var orderForCreationDto = new OrderForCreationDto();
 
             var order = new Order();
             var orderDto = new OrderDto();
