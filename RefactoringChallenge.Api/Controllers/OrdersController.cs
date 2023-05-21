@@ -24,16 +24,11 @@ namespace RefactoringChallenge.Controllers
         }
 
 
-        //[HttpGet("{orderId}")]
-        //public IActionResult GetById([FromRoute] int orderId)
-        //{
-        //    var result = _mapper.From(_northwindDbContext.Orders).ProjectToType<OrderResponse>().FirstOrDefault(o => o.OrderId == orderId);
-
-        //    if (result == null)
-        //        return NotFound();
-
-        //    return Json(result);
-        //}
+        [HttpGet("{orderId}")]
+        public async Task<IActionResult> GetById([FromRoute] int orderId)
+        {
+            return Ok(await _orderService.GetOrderByIdAsync(orderId));
+        }
 
         //[HttpPost("[action]")]
         //public IActionResult Create(
