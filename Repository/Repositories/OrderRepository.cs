@@ -4,7 +4,7 @@ using Repository.Contracts;
 
 namespace Repository
 {
-    public class OrderRepository : RepositoryBase<Order>, IOrderRepository
+    internal class OrderRepository : RepositoryBase<Order>, IOrderRepository
     {
         public OrderRepository(RepositoryContext repositoryContext)
             : base(repositoryContext)

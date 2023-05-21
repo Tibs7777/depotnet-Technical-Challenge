@@ -17,9 +17,9 @@ using Services.Contracts;
 //Add a rate limiter
 //Use CORS
 //Add Better logging
-//Ensure the prod db connection string is behind a any secret storing method, like env variables, an uncomitted secrets file or Azure Key Vault
+//Ensure the prod db connection string is behind any secret storing method, like env variables, an uncomitted secrets file, or Azure Key Vault
 //Use useHsts for security
-//Auth (But this is more of a feature, and may not be needed in all apps)
+//Add Authentication (But this is more of a feature, and may not be needed in all apps)
 
 namespace RefactoringChallenge
 {

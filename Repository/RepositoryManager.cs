@@ -2,21 +2,18 @@
 
 namespace Repository
 {
-
-
     public class RepositoryManager : IRepositoryManager
     {
         private readonly RepositoryContext _repositoryContext;
-        private IOrderRepository _orderRepository;
+        private Lazy<IOrderRepository> _orderRepository;
 
         public RepositoryManager(RepositoryContext repositoryContext)
         {
             _repositoryContext = repositoryContext;
-            _orderRepository = new OrderRepository(_repositoryContext);
+            _orderRepository = new  Lazy<IOrderRepository>(() => new OrderRepository(_repositoryContext));
         }
 
-        //Todo: Lazy loading
-        public IOrderRepository OrderRepository { get { return _orderRepository; } }
+        public IOrderRepository OrderRepository => _orderRepository.Value;
 
         public async Task SaveAsync()
         {
