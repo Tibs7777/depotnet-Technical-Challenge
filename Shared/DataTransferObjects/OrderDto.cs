@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace RefactoringChallenge.Controllers
+﻿namespace Shared.DataTransferObjects
 {
-    public class OrderResponse
+    public class OrderDto
     {
         public int OrderId { get; set; }
         public string CustomerId { get; set; }
@@ -19,6 +16,6 @@ namespace RefactoringChallenge.Controllers
         public string ShipRegion { get; set; }
         public string ShipPostalCode { get; set; }
         public string ShipCountry { get; set; }
-        public ICollection<OrderDetailResponse> OrderDetails { get; set; }
+        public ICollection<OrderDetailDto> OrderDetails { get; set; }
     }
 }

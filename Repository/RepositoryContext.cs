@@ -1,14 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Entities.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace RefactoringChallenge.Entities
+namespace Repository
 {
-    public partial class NorthwindDbContext : DbContext
+    public partial class RepositoryContext : DbContext
     {
-        public NorthwindDbContext()
+        public RepositoryContext()
         {
         }
 
-        public NorthwindDbContext(DbContextOptions<NorthwindDbContext> options)
+        public RepositoryContext(DbContextOptions<RepositoryContext> options)
             : base(options)
         {
         }
@@ -21,6 +22,8 @@ namespace RefactoringChallenge.Entities
         public virtual DbSet<Product> Products { get; set; }
         public virtual DbSet<Shipper> Shippers { get; set; }
         public virtual DbSet<Supplier> Suppliers { get; set; }
+
+        //Given more time, each of these entity ModelBuilders would be in their own class file.
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

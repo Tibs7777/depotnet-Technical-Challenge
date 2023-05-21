@@ -1,12 +1,25 @@
-using Mapster;
-using MapsterMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using RefactoringChallenge.Entities;
+using System.Text.Json.Serialization;
+using Repository;
+using Repository.Contracts;
+using RefactoringChallenge.Extensions;
+using Services;
+using Services.Contracts;
+
+//Given more time I would use extension methods to clean up the startup class
+
+//For production I would:
+//Add a rate limiter
+//Use CORS
+//Add Better logging
+//Ensure the prod db connection string is behind a any secret storing method, like env variables, an uncomitted secrets file or Azure Key Vault
+//Use useHsts for security
+//Auth (But this is more of a feature, and may not be needed in all apps)
 
 namespace RefactoringChallenge
 {
@@ -19,23 +32,28 @@ namespace RefactoringChallenge
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<NorthwindDbContext>(options => options.UseSqlServer("name=ConnectionStrings:DefaultConnection"));
+            services.AddDbContext<RepositoryContext>(options => options.UseSqlServer("name=ConnectionStrings:DefaultConnection").EnableSensitiveDataLogging());
 
-            services.AddSingleton(TypeAdapterConfig.GlobalSettings);
-            services.AddScoped<IMapper, ServiceMapper>();
+            services.AddScoped<IRepositoryManager, RepositoryManager>();
+            services.AddScoped<IOrderService, OrderService>();
+            services.AddAutoMapper(typeof(MappingProfile));
 
-            services.AddControllers();
+            services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                });
 
             services.AddSwaggerGen();
         }
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseCustomExceptionHandler();
+
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace RefactoringChallenge.Entities
+﻿namespace Entities.Models
 {
     public partial class Order
     {
@@ -24,7 +21,6 @@ namespace RefactoringChallenge.Entities
         public string ShipRegion { get; set; }
         public string ShipPostalCode { get; set; }
         public string ShipCountry { get; set; }
-
         public virtual Customer Customer { get; set; }
         public virtual Employee Employee { get; set; }
         public virtual Shipper ShipViaNavigation { get; set; }

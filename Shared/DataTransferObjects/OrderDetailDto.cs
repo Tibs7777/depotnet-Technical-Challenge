@@ -1,6 +1,6 @@
-﻿namespace RefactoringChallenge.Controllers
+﻿namespace Shared.DataTransferObjects
 {
-    public class OrderDetailResponse
+    public class OrderDetailDto
     {
         public int OrderId { get; set; }
         public int ProductId { get; set; }

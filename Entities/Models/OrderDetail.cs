@@ -1,4 +1,4 @@
-﻿namespace RefactoringChallenge.Entities
+﻿namespace Entities.Models
 {
     public partial class OrderDetail
     {
