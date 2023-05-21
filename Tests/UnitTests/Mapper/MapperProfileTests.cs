@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Entities.Models;
 using RefactoringChallenge;
-using Shared.DataTransferObjects;
 using Xunit;
 
 namespace Tests.UnitTests.Mapper

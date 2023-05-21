@@ -47,20 +47,12 @@ namespace RefactoringChallenge.Controllers
             return Ok(await _orderService.CreateOrderDetailsByOrderIdAsync(orderId,orderDetails));
         }
 
-        //[HttpPost("{orderId}/[action]")]
-        //public IActionResult Delete([FromRoute] int orderId)
-        //{
-        //    var order = _northwindDbContext.Orders.FirstOrDefault(o => o.OrderId == orderId);
-        //    if (order == null)
-        //        return NotFound();
+        [HttpDelete("{orderId}")]
+        public async Task<IActionResult> DeleteById([FromRoute] int orderId)
+        {
+            await _orderService.DeleteOrderByIdAsync(orderId);
 
-        //    var orderDetails = _northwindDbContext.OrderDetails.Where(od => od.OrderId == orderId);
-
-        //    _northwindDbContext.OrderDetails.RemoveRange(orderDetails);
-        //    _northwindDbContext.Orders.Remove(order);
-        //    _northwindDbContext.SaveChanges();
-
-        //    return Ok();
-        //}
+            return NoContent();
+        }
     }
 }

@@ -25,10 +25,7 @@ namespace Services
 
         public async Task<OrderDto> GetOrderByIdAsync(int orderId)
         {
-            var order = await _repositoryManager.OrderRepository.GetOrderByIdAsync(orderId);
-
-            if (order == null)
-                throw new NotFoundException($"Order with id {orderId} not found");
+            var order = await GetOrderAndCheckIfExists(orderId);
 
             return _mapper.Map<OrderDto>(order);
         }
@@ -46,10 +43,7 @@ namespace Services
 
         public async Task<IEnumerable<OrderDetailDto>> CreateOrderDetailsByOrderIdAsync(int orderId, IEnumerable<OrderDetailForCreationDto> orderDetailForCreationDto)
         {
-            var order = await _repositoryManager.OrderRepository.GetOrderByIdAsync(orderId);
-
-            if (order == null)
-                throw new NotFoundException($"Order with id {orderId} not found");
+            var order = await GetOrderAndCheckIfExists(orderId);
 
             var orderDetails = _mapper.Map<IEnumerable<OrderDetail>>(orderDetailForCreationDto);
 
@@ -61,6 +55,25 @@ namespace Services
             await _repositoryManager.SaveAsync();
 
             return _mapper.Map<IEnumerable<OrderDetailDto>>(orderDetails);
+        }
+
+        public async Task DeleteOrderByIdAsync(int orderId)
+        {
+            var order = await GetOrderAndCheckIfExists(orderId);
+
+            _repositoryManager.OrderRepository.DeleteOrder(order);
+
+            await _repositoryManager.SaveAsync();
+        }
+
+        private async Task<Order> GetOrderAndCheckIfExists(int orderId)
+        {
+            var order = await _repositoryManager.OrderRepository.GetOrderByIdAsync(orderId);
+
+            if (order == null)
+                throw new NotFoundException($"Order with id {orderId} not found");
+
+            return order;
         }
     }
 }

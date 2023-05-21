@@ -7,6 +7,7 @@ namespace Services.Contracts
         Task<IEnumerable<OrderDto>> GetOrdersAsync(int pageSize, int pageNumber);
         Task<OrderDto> GetOrderByIdAsync(int orderId);
         Task<OrderDto> CreateOrderAsync(OrderForCreationDto order);
+        Task DeleteOrderByIdAsync(int orderId);
         Task<IEnumerable<OrderDetailDto>> CreateOrderDetailsByOrderIdAsync(int orderId, IEnumerable<OrderDetailForCreationDto> orderDetailForCreationDto);
     }
 }

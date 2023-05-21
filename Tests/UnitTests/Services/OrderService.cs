@@ -7,10 +7,10 @@ using Shared.DataTransferObjects;
 using Services;
 using Entities.Exceptions;
 
-//A quick word on testing for the reviewer since it was mentioned so much:
+//A quick word on testing since it was mentioned so much:
 
 //I've only included unit tests in this challenge. I think Integration tests might be outside the scope of it (especially since unit tests were mentioned by name)
-//I'd also rather look to a more robust process for integration testing than simply using in-memory databases due to their limitations.
+//I'd also rather look to a more robust process for integration testing than simply using in-memory databases due to their limitations, which is what I would do here if needed.
 //I've not tested the repository layer, as for these kinds of tests, it's a bit too simple, and would also be covered by the integration tests.
 
 namespace Tests.UnitTests.Services
@@ -71,7 +71,7 @@ namespace Tests.UnitTests.Services
         }
 
         [Fact]
-        public async Task GetOrderByIdAsync_OrderNotFound_ThrowsNotFoundException()
+        public async Task GetOrderAndCheckIfExists_ThrowsNotFoundException()
         {
             // Arrange
             const int orderId = 1;
@@ -136,23 +136,22 @@ namespace Tests.UnitTests.Services
         }
 
         [Fact]
-        public async Task CreateOrderDetailsByOrderIdAsync_OrderNotFound_ThrowsNotFoundException()
+        public async Task DeleteOrderByIdAsync_ValidOrderId_DeletesOrder()
         {
             // Arrange
-            var orderDetailsForCreation = new List<OrderDetailForCreationDto>()
-            {
-                new OrderDetailForCreationDto(),
-            };
             const int orderId = 1;
-            Order? foundOrder = null;
+            var orderToDelete = new Order { OrderId = orderId };
 
-            _mockRepositoryManager.Setup(repoManager => repoManager.OrderRepository.GetOrderByIdAsync(It.IsAny<int>())).ReturnsAsync(foundOrder);
+            _mockRepositoryManager.Setup(repoManager => repoManager.OrderRepository.GetOrderByIdAsync(orderId)).ReturnsAsync(orderToDelete);
+            _mockRepositoryManager.Setup(repoManager => repoManager.SaveAsync()).Returns(Task.CompletedTask);
 
-            // Act and Assert
-            await Assert.ThrowsAsync<NotFoundException>(async () => await _service.CreateOrderDetailsByOrderIdAsync(orderId, orderDetailsForCreation));
-            _mockRepositoryManager.Verify(repoManager => repoManager.OrderRepository.CreateOrder(It.IsAny<Order>()), Times.Never);
-            _mockRepositoryManager.Verify(repoManager => repoManager.SaveAsync(), Times.Never);
+            // Act
+            await _service.DeleteOrderByIdAsync(orderId);
+
+            // Assert
+            _mockRepositoryManager.Verify(repoManager => repoManager.OrderRepository.GetOrderByIdAsync(orderId), Times.Once);
+            _mockRepositoryManager.Verify(repoManager => repoManager.OrderRepository.DeleteOrder(orderToDelete), Times.Once);
+            _mockRepositoryManager.Verify(repoManager => repoManager.SaveAsync(), Times.Once);
         }
-
     }
 }

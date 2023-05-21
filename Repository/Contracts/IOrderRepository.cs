@@ -9,5 +9,7 @@ namespace Repository.Contracts
         Task<Order?> GetOrderByIdAsync(int orderId);
 
         void CreateOrder(Order order);
+
+        void DeleteOrder(Order order);
     }
 }
