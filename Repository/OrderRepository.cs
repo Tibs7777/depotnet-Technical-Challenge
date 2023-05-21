@@ -22,6 +22,5 @@ namespace Repository
         }
 
         public void CreateOrder(Order order) => Create(order);
-        
     }
 }

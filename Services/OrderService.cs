@@ -16,7 +16,7 @@ namespace Services
             _mapper = mapper;
             _repositoryManager = repositoryManager;
         }
-        public async Task<List<OrderDto>> GetOrdersAsync(int pageSize, int pageNumber)
+        public async Task<IEnumerable<OrderDto>> GetOrdersAsync(int pageSize, int pageNumber)
         {
             var orders = await _repositoryManager.OrderRepository.GetOrdersAsync(pageSize, pageNumber);
 
@@ -42,6 +42,25 @@ namespace Services
             await _repositoryManager.SaveAsync();
 
             return _mapper.Map<OrderDto>(order);
+        }
+
+        public async Task<IEnumerable<OrderDetailDto>> CreateOrderDetailsByOrderIdAsync(int orderId, IEnumerable<OrderDetailForCreationDto> orderDetailForCreationDto)
+        {
+            var order = await _repositoryManager.OrderRepository.GetOrderByIdAsync(orderId);
+
+            if (order == null)
+                throw new NotFoundException($"Order with id {orderId} not found");
+
+            var orderDetails = _mapper.Map<IEnumerable<OrderDetail>>(orderDetailForCreationDto);
+
+            foreach(var orderDetail in orderDetails)
+            {
+                order.OrderDetails.Add(orderDetail);
+            }
+
+            await _repositoryManager.SaveAsync();
+
+            return _mapper.Map<IEnumerable<OrderDetailDto>>(orderDetails);
         }
     }
 }

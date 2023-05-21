@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Services.Contracts;
@@ -41,31 +40,12 @@ namespace RefactoringChallenge.Controllers
             return CreatedAtAction(nameof(GetById), new { orderId = createdOrder.OrderId }, createdOrder);
         }
 
-        //[HttpPost("{orderId}/[action]")]
-        //public IActionResult AddProductsToOrder([FromRoute] int orderId, IEnumerable<OrderDetailRequest> orderDetails)
-        //{
-        //    var order = _northwindDbContext.Orders.FirstOrDefault(o => o.OrderId == orderId);
-        //    if (order == null)
-        //        return NotFound();
-
-        //    var newOrderDetails = new List<OrderDetail>();
-        //    foreach (var orderDetail in orderDetails)
-        //    {
-        //        newOrderDetails.Add(new OrderDetail
-        //        {
-        //            OrderId = orderId,
-        //            ProductId = orderDetail.ProductId,
-        //            Discount = orderDetail.Discount,
-        //            Quantity = orderDetail.Quantity,
-        //            UnitPrice = orderDetail.UnitPrice,
-        //        });
-        //    }
-
-        //    _northwindDbContext.OrderDetails.AddRange(newOrderDetails);
-        //    _northwindDbContext.SaveChanges();
-
-        //    return Json(newOrderDetails.Select(od => od.Adapt<OrderDetailResponse>()));
-        //}
+        //Typically, we would do a created here, but I don't have a uri to point the user to for order details, so I have sent the new order details back with a 200
+        [HttpPost("[action]/{orderId}")]
+        public async Task<IActionResult> AddProductsToOrder([FromRoute] int orderId, IEnumerable<OrderDetailForCreationDto> orderDetails)
+        {
+            return Ok(await _orderService.CreateOrderDetailsByOrderIdAsync(orderId,orderDetails));
+        }
 
         //[HttpPost("{orderId}/[action]")]
         //public IActionResult Delete([FromRoute] int orderId)
