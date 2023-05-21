@@ -20,5 +20,8 @@ namespace Repository
         {
             return await RepositoryContext.Orders.Include(o => o.OrderDetails).FirstOrDefaultAsync(o => o.OrderId == orderId);
         }
+
+        public void CreateOrder(Order order) => Create(order);
+        
     }
 }

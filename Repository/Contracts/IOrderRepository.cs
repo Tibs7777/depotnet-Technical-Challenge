@@ -7,5 +7,7 @@ namespace Repository.Contracts
         Task<List<Order>> GetOrdersAsync(int pageSize, int pageNumber);
 
         Task<Order?> GetOrderByIdAsync(int orderId);
+
+        void CreateOrder(Order order);
     }
 }

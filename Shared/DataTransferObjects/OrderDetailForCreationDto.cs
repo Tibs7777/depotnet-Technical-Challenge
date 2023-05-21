@@ -4,16 +4,16 @@ namespace Shared.DataTransferObjects
 {
     public class OrderDetailForCreationDto
     {
-        [Required(ErrorMessage = "ProductId is a required field.")]
+        [Required(ErrorMessage = "ProductId isarequired.")]
         public int ProductId { get; set; }
 
-        [Required(ErrorMessage = "UnitPrice is a required field.")]
+        [Required(ErrorMessage = "UnitPrice is required.")]
         public decimal UnitPrice { get; set; }
 
-        [Required(ErrorMessage = "Quantity is a required field.")]
+        [Required(ErrorMessage = "Quantity is required.")]
         public short Quantity { get; set; }
 
-        [Required(ErrorMessage = "Discount is a required field.")]
+        [Required(ErrorMessage = "Discount is required.")]
         public float Discount { get; set; }
     }
 }

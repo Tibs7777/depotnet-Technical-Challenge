@@ -1,6 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Services.Contracts;
+using Shared.DataTransferObjects;
 using Shared.Paging;
 
 namespace RefactoringChallenge.Controllers
@@ -24,61 +27,19 @@ namespace RefactoringChallenge.Controllers
         }
 
 
-        [HttpGet("{orderId}")]
+        [HttpGet("{orderId}", Name = "OrderById")]
         public async Task<IActionResult> GetById([FromRoute] int orderId)
         {
             return Ok(await _orderService.GetOrderByIdAsync(orderId));
         }
 
-        //[HttpPost("[action]")]
-        //public IActionResult Create(
-        //    string customerId,
-        //    int? employeeId,
-        //    DateTime? requiredDate,
-        //    int? shipVia,
-        //    decimal? freight,
-        //    string shipName,
-        //    string shipAddress,
-        //    string shipCity,
-        //    string shipRegion,
-        //    string shipPostalCode,
-        //    string shipCountry,
-        //    IEnumerable<OrderDetailRequest> orderDetails
-        //    )
-        //{
-        //    var newOrderDetails = new List<OrderDetail>();
-        //    foreach (var orderDetail in orderDetails)
-        //    {
-        //        newOrderDetails.Add(new OrderDetail
-        //        {
-        //            ProductId = orderDetail.ProductId,
-        //            Discount = orderDetail.Discount,
-        //            Quantity = orderDetail.Quantity,
-        //            UnitPrice = orderDetail.UnitPrice,
-        //        });
-        //    }
+        [HttpPost()]
+        public async Task<IActionResult> Create(OrderForCreationDto orderForCreation)
+        {
+            var createdOrder = await _orderService.CreateOrderAsync(orderForCreation);
 
-        //    var newOrder = new Order
-        //    {
-        //        CustomerId = customerId,
-        //        EmployeeId = employeeId,
-        //        OrderDate = DateTime.UtcNow,
-        //        RequiredDate = requiredDate,
-        //        ShipVia = shipVia,
-        //        Freight = freight,
-        //        ShipName = shipName,
-        //        ShipAddress = shipAddress,
-        //        ShipCity = shipCity,
-        //        ShipRegion = shipRegion,
-        //        ShipPostalCode = shipPostalCode,
-        //        ShipCountry = shipCountry,
-        //        OrderDetails = newOrderDetails,
-        //    };
-        //    _northwindDbContext.Orders.Add(newOrder);
-        //    _northwindDbContext.SaveChanges();
-
-        //    return Json(newOrder.Adapt<OrderResponse>());
-        //}
+            return CreatedAtAction(nameof(GetById), new { orderId = createdOrder.OrderId }, createdOrder);
+        }
 
         //[HttpPost("{orderId}/[action]")]
         //public IActionResult AddProductsToOrder([FromRoute] int orderId, IEnumerable<OrderDetailRequest> orderDetails)

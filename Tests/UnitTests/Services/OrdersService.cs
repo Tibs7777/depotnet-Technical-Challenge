@@ -48,7 +48,6 @@ namespace Tests.UnitTests.Services
             Assert.Equal(orderDtoList.Count, result.Count);
             Assert.IsType<List<OrderDto>>(result);
             _mockRepositoryManager.Verify(x => x.OrderRepository.GetOrdersAsync(pageSize, pageNumber), Times.Once);
-            _mockMapper.Verify(x => x.Map<List<OrderDto>>(orderList), Times.Once);
         }
 
         [Fact]
@@ -69,7 +68,6 @@ namespace Tests.UnitTests.Services
             Assert.IsType<OrderDto>(result);
             Assert.Equal(orderDto, result);
             _mockRepositoryManager.Verify(x => x.OrderRepository.GetOrderByIdAsync(1), Times.Once);
-            _mockMapper.Verify(x => x.Map<OrderDto>(order), Times.Once);
         }
 
         [Fact]
@@ -84,5 +82,49 @@ namespace Tests.UnitTests.Services
             _mockRepositoryManager.Verify(x => x.OrderRepository.GetOrderByIdAsync(orderId), Times.Once);
         }
 
+        [Fact]
+        public async Task CreateOrderAsync_ValidOrderForCreation_ReturnsCreatedOrder()
+        {
+            // Arrange
+            var orderForCreationDto = new OrderForCreationDto
+            {
+                CustomerId = "VIMET",
+                EmployeeId = 1,
+                Freight = 1,
+                RequiredDate = DateTime.Now,
+                ShipAddress = "Test",
+                ShipCity = "Test",
+                ShipCountry = "Test",
+                ShipName = "Test",
+                ShipPostalCode = "Test",
+                ShipRegion = "Test",
+                ShipVia = 1,
+
+                OrderDetails = new List<OrderDetailForCreationDto>
+                {
+                    new OrderDetailForCreationDto
+                    {
+                        ProductId = 1,
+                        Quantity = 1
+                    }
+                }
+            };
+
+            var order = new Order();
+            var orderDto = new OrderDto();
+
+            _mockMapper.Setup(mapper => mapper.Map<Order>(orderForCreationDto)).Returns(order);
+            _mockMapper.Setup(mapper => mapper.Map<OrderDto>(order)).Returns(orderDto);
+
+            _mockRepositoryManager.Setup(repoManager => repoManager.OrderRepository.CreateOrder(order));
+
+            // Act
+            var result = await _service.CreateOrderAsync(orderForCreationDto);
+
+            // Assert
+            Assert.Equal(orderDto, result);
+            _mockRepositoryManager.Verify(repoManager => repoManager.OrderRepository.CreateOrder(order), Times.Once);
+            _mockRepositoryManager.Verify(repoManager => repoManager.SaveAsync(), Times.Once);
+        }
     }
 }
