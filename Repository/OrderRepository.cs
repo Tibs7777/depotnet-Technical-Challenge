@@ -16,7 +16,7 @@ namespace Repository
             return await RepositoryContext.Orders.Include(o => o.OrderDetails).Skip(pageNumber * pageSize).Take(pageSize).AsNoTracking().ToListAsync();
         }
 
-        public async Task<Order> GetOrderAsync(int orderId)
+        public async Task<Order?> GetOrderByIdAsync(int orderId)
         {
             return await RepositoryContext.Orders.Include(o => o.OrderDetails).FirstOrDefaultAsync(o => o.OrderId == orderId);
         }

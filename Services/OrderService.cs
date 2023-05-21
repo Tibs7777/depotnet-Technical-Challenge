@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Entities.Exceptions;
 using Repository.Contracts;
 using Services.Contracts;
 using Shared.DataTransferObjects;
@@ -19,6 +20,16 @@ namespace Services
             var orders = await _repositoryManager.OrderRepository.GetOrdersAsync(pageSize, pageNumber);
 
             return _mapper.Map<List<OrderDto>>(orders);
+        }
+
+        public async Task<OrderDto> GetOrderByIdAsync(int orderId)
+        {
+            var order = await _repositoryManager.OrderRepository.GetOrderByIdAsync(orderId);
+
+            if (order == null)
+                throw new NotFoundException($"Order with id {orderId} not found");
+
+            return _mapper.Map<OrderDto>(order);
         }
     }
 }
