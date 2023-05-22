@@ -1,11 +1,12 @@
-﻿using Moq;
-using Xunit;
-using Repository.Contracts;
+﻿using Xunit;
 using AutoMapper;
 using Entities.Models;
 using Shared.DataTransferObjects;
-using Services;
+using Services;using Repository;
+using Microsoft.EntityFrameworkCore;
+using RefactoringChallenge;
 using Entities.Exceptions;
+using Tests.UnitTests.Helpers;
 
 //A quick word on testing since it was mentioned so much:
 
@@ -15,39 +16,49 @@ using Entities.Exceptions;
 
 namespace Tests.UnitTests.Services
 {
-    public class OrderServiceTests
+    public class OrderServiceTests : IDisposable
     {
-        private readonly Mock<IRepositoryManager> _mockRepositoryManager;
-        private readonly Mock<IMapper> _mockMapper;
+        private readonly DbContextOptions<RepositoryContext> _options;
+        private readonly IMapper _mapper;
         private readonly OrderService _service;
-
+        private RepositoryContext _repositoryContext;
         public OrderServiceTests()
         {
-            _mockRepositoryManager = new Mock<IRepositoryManager>();
-            _mockMapper = new Mock<IMapper>();
-            _service = new OrderService(_mockMapper.Object, _mockRepositoryManager.Object);
+            _options = new DbContextOptionsBuilder<RepositoryContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .Options;
+
+            var context = new RepositoryContext(_options);
+            _repositoryContext = context;
+
+            var configuration = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile(new MappingProfile());
+            });
+            _mapper = configuration.CreateMapper();
+
+            var repositoryManager = new RepositoryManager(context);
+
+            _service = new OrderService(_mapper, repositoryManager);
+
+            DatabaseSeeder.SeedDatabase(_repositoryContext);
+        }
+
+        public void Dispose()
+        {
+            _repositoryContext.Database.EnsureDeleted();
+            _repositoryContext.Dispose();
         }
 
         [Fact]
         public async Task GetOrdersAsync_ValidPageParameters_ReturnsListOfOrders()
         {
-            //Arrange
-            const int pageSize = 10;
+            const int pageSize = 2;
             const int pageNumber = 1;
 
-            var orderList = new List<Order> { new Order(), new Order() };
-            _mockRepositoryManager.Setup(x => x.OrderRepository.GetOrdersAsync(pageSize, pageNumber)).ReturnsAsync(orderList);
-
-            var orderDtoList = new List<OrderDto> { new OrderDto(), new OrderDto() };
-            _mockMapper.Setup(x => x.Map<List<OrderDto>>(orderList)).Returns(orderDtoList);
-
-            // Act
             List<OrderDto> result = await _service.GetOrdersAsync(pageSize, pageNumber);
 
-            // Assert
-            Assert.Equal(orderDtoList, result);
-            Assert.IsType<List<OrderDto>>(result);
-            _mockRepositoryManager.Verify(x => x.OrderRepository.GetOrdersAsync(pageSize, pageNumber), Times.Once);
+            Assert.Equal(2, result.Count);
         }
 
         [Theory]
@@ -56,114 +67,96 @@ namespace Tests.UnitTests.Services
         [InlineData(1, 0)]
         public async Task GetOrdersAsync_ThrowsBadRequestException_WhenInvalidPageSizeOrPageNumber(int pageSize, int pageNumber)
         {
-            // Act and Assert
             await Assert.ThrowsAsync<BadRequestException>(() => _service.GetOrdersAsync(pageSize, pageNumber));
-
-            _mockRepositoryManager.Verify(x => x.OrderRepository.GetOrdersAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
-            _mockMapper.Verify(x => x.Map<List<OrderDto>>(It.IsAny<List<Order>>()), Times.Never);
         }
 
 
         [Fact]
         public async Task GetOrderByIdAsync_ReturnsOrderDto()
         {
-            // Arrange
-            var order = new Order();
-            _mockRepositoryManager.Setup(x => x.OrderRepository.GetOrderByIdAsync(It.IsAny<int>())).ReturnsAsync(order);
+            const int orderId = 1;
 
-            var orderDto = new OrderDto();
-            _mockMapper.Setup(x => x.Map<OrderDto>(It.IsAny<Order>())).Returns(orderDto);
+            OrderDto result = await _service.GetOrderByIdAsync(orderId);
 
-            // Act
-            OrderDto result = await _service.GetOrderByIdAsync(1);
-
-            // Assert
             Assert.NotNull(result);
-            Assert.IsType<OrderDto>(result);
-            Assert.Equal(orderDto, result);
-            _mockRepositoryManager.Verify(x => x.OrderRepository.GetOrderByIdAsync(1), Times.Once);
+            Assert.Equal(orderId, result.OrderId);
         }
 
         [Fact]
         public async Task GetOrderAndCheckIfExists_ThrowsNotFoundException()
         {
-            // Arrange
-            const int orderId = 1;
-            const Order? notFoundOrder = null;
-            _mockRepositoryManager.Setup(x => x.OrderRepository.GetOrderByIdAsync(orderId)).ReturnsAsync(notFoundOrder);
+            const int notFoundOrderId = 100;
 
-            // Act & Assert
-            await Assert.ThrowsAsync<NotFoundException>(() => _service.GetOrderByIdAsync(orderId));
-            _mockRepositoryManager.Verify(x => x.OrderRepository.GetOrderByIdAsync(orderId), Times.Once);
+            await Assert.ThrowsAsync<NotFoundException>(() => _service.GetOrderByIdAsync(notFoundOrderId));
         }
 
         [Fact]
         public async Task CreateOrderAsync_ValidOrderForCreation_ReturnsCreatedOrder()
         {
-            // Arrange
-            var orderForCreationDto = new OrderForCreationDto();
+            OrderForCreationDto orderForCreationDto = new OrderForCreationDto
+            {
+                CustomerId = "VINET",
+                EmployeeId = 1,
+                RequiredDate = DateTime.Parse("2023-05-21T19:29:17.635Z"),
+                ShipVia = 1,
+                Freight = 1,
+                ShipName = "string",
+                ShipAddress = "string",
+                ShipCity = "string",
+                ShipRegion = "string",
+                ShipPostalCode = "string",
+                ShipCountry = "string",
+                OrderDetails = new List<OrderDetailForCreationDto>
+                {
+                    new OrderDetailForCreationDto
+                    {
+                        ProductId = 1,
+                        UnitPrice = 1,
+                        Quantity = 1,
+                        Discount = 0
+                    }
+                }
+            };
 
-            var order = new Order();
-            var orderDto = new OrderDto();
-
-            _mockMapper.Setup(mapper => mapper.Map<Order>(orderForCreationDto)).Returns(order);
-            _mockMapper.Setup(mapper => mapper.Map<OrderDto>(order)).Returns(orderDto);
-
-            _mockRepositoryManager.Setup(repoManager => repoManager.OrderRepository.CreateOrder(order));
-
-            // Act
             OrderDto result = await _service.CreateOrderAsync(orderForCreationDto);
+            Order? dbResult = _repositoryContext.Orders.Find(result.OrderId);
 
-            // Assert
-            Assert.Equal(orderDto, result);
-            _mockRepositoryManager.Verify(repoManager => repoManager.OrderRepository.CreateOrder(order), Times.Once);
-            _mockRepositoryManager.Verify(repoManager => repoManager.SaveAsync(), Times.Once);
+            Assert.NotNull(dbResult);
+            Assert.Equal(result.OrderId, dbResult.OrderId);
         }
 
         [Fact]
         public async Task CreateOrderDetailsByOrderIdAsync_ValidOrderForCreation_ReturnsCreatedOrderDetails()
         {
-            // Arrange
             var orderDetailsForCreation = new List<OrderDetailForCreationDto>()
             {
-                new OrderDetailForCreationDto(),
+                new OrderDetailForCreationDto()
+                {
+                    ProductId = 40,
+                    Discount = 0,
+                    Quantity = 10,
+                    UnitPrice = 10
+                },
             };
             const int orderId = 1;
-            var foundOrder = new Order();
-            var orderDetails = new List<OrderDetail>();
-            var finalOrderDetailDtos = new List<OrderDetailDto>();
 
-            _mockRepositoryManager.Setup(repoManager => repoManager.OrderRepository.GetOrderByIdAsync(It.IsAny<int>())).ReturnsAsync(foundOrder);
-            _mockRepositoryManager.Setup(repoManager => repoManager.SaveAsync()).Returns(Task.CompletedTask);
-            _mockMapper.Setup(mapper => mapper.Map<IEnumerable<OrderDetail>>(orderDetailsForCreation)).Returns(orderDetails);
-            _mockMapper.Setup(mapper => mapper.Map<IEnumerable<OrderDetailDto>>(orderDetails)).Returns(finalOrderDetailDtos);
-
-            // Act
             List<OrderDetailDto> result = await _service.CreateOrderDetailsByOrderIdAsync(orderId, orderDetailsForCreation);
+            Order? dbResult = _repositoryContext.Orders.Find(orderId);
 
-            // Assert
-            Assert.Equal(finalOrderDetailDtos, result);
-            _mockRepositoryManager.Verify(repoManager => repoManager.OrderRepository.GetOrderByIdAsync(orderId), Times.Once);
-            _mockRepositoryManager.Verify(repoManager => repoManager.SaveAsync(), Times.Once);
+            Assert.NotNull(dbResult);
+            Assert.Equal(1, dbResult.OrderDetails.Count);
+            Assert.Equal(40, dbResult.OrderDetails.First().ProductId);
         }
 
         [Fact]
         public async Task DeleteOrderByIdAsync_ValidOrderId_DeletesOrder()
         {
-            // Arrange
             const int orderId = 1;
-            var orderToDelete = new Order { OrderId = orderId };
 
-            _mockRepositoryManager.Setup(repoManager => repoManager.OrderRepository.GetOrderByIdAsync(orderId)).ReturnsAsync(orderToDelete);
-            _mockRepositoryManager.Setup(repoManager => repoManager.SaveAsync()).Returns(Task.CompletedTask);
-
-            // Act
             await _service.DeleteOrderByIdAsync(orderId);
+            Order? dbResult = _repositoryContext.Orders.Find(orderId);
 
-            // Assert
-            _mockRepositoryManager.Verify(repoManager => repoManager.OrderRepository.GetOrderByIdAsync(orderId), Times.Once);
-            _mockRepositoryManager.Verify(repoManager => repoManager.OrderRepository.DeleteOrder(orderToDelete), Times.Once);
-            _mockRepositoryManager.Verify(repoManager => repoManager.SaveAsync(), Times.Once);
+            Assert.Null(dbResult);
         }
     }
 }
