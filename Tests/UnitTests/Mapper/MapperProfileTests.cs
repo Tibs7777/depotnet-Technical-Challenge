@@ -15,9 +15,6 @@ namespace Tests.UnitTests.Mapper
             _mapper = config.CreateMapper();
         }
 
-        //Mapper config test will pick up on any errors in the profiles themselves. (e.g unmapped properties)
-        //If any destination properties are unmapped, the test will fail.
-        //Since we only have simple profiles, this is mostly all we need for our exact case in terms of testing property mapping.
         [Fact]
         public void AutoMapper_Configuration_IsValid()
         {
@@ -34,13 +31,13 @@ namespace Tests.UnitTests.Mapper
             var orderForCreationDto = new OrderForCreationDto();
 
             // Act
-            var order = _mapper.Map<Order>(orderForCreationDto);
+            Order order = _mapper.Map<Order>(orderForCreationDto);
 
             // Assert
             Assert.NotNull(order.OrderDate);
 
-            var actualOrderDate = order.OrderDate.Value;
-            var comparisonResult = DateTime.Compare(expectedOrderDate, actualOrderDate);
+            DateTime actualOrderDate = order.OrderDate.Value;
+            int comparisonResult = DateTime.Compare(expectedOrderDate, actualOrderDate);
             Assert.InRange(comparisonResult, -10, 10);
         }
     }

@@ -16,9 +16,8 @@ using Services.Contracts;
 //For production I would:
 //Add a rate limiter
 //Use CORS
-//Add Better logging
+//Add logging
 //Ensure the prod db connection string is behind any secret storing method, like env variables, an uncomitted secrets file, or Azure Key Vault
-//Use useHsts for security
 //Add Authentication (But this is more of a feature, and may not be needed in all apps)
 
 namespace RefactoringChallenge
@@ -34,7 +33,7 @@ namespace RefactoringChallenge
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<RepositoryContext>(options => options.UseSqlServer("name=ConnectionStrings:DefaultConnection").EnableSensitiveDataLogging());
+            services.AddDbContext<RepositoryContext>(options => options.UseSqlServer("name=ConnectionStrings:DefaultConnection"));
 
             services.AddScoped<IRepositoryManager, RepositoryManager>();
             services.AddScoped<IOrderService, OrderService>();
@@ -57,6 +56,9 @@ namespace RefactoringChallenge
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            if (app.Environment.IsProduction())
+                app.UseHsts();
 
             app.UseHttpsRedirection();
 

@@ -35,13 +35,13 @@ namespace RefactoringChallenge.Controllers
         [HttpPost()]
         public async Task<IActionResult> Create(OrderForCreationDto orderForCreation)
         {
-            var createdOrder = await _orderService.CreateOrderAsync(orderForCreation);
+            OrderDto createdOrder = await _orderService.CreateOrderAsync(orderForCreation);
 
             return CreatedAtAction(nameof(GetById), new { orderId = createdOrder.OrderId }, createdOrder);
         }
 
         //Typically, we would do a created here, but I don't have a uri to point the user to for order details, so I have sent the new order details back with a 200
-        [HttpPost("[action]/{orderId}")]
+        [HttpPost("{orderId}/products")]
         public async Task<IActionResult> AddProductsToOrder([FromRoute] int orderId, IEnumerable<OrderDetailForCreationDto> orderDetails)
         {
             return Ok(await _orderService.CreateOrderDetailsByOrderIdAsync(orderId,orderDetails));

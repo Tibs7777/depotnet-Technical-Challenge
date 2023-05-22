@@ -16,23 +16,26 @@ namespace Services
             _mapper = mapper;
             _repositoryManager = repositoryManager;
         }
-        public async Task<IEnumerable<OrderDto>> GetOrdersAsync(int pageSize, int pageNumber)
+        public async Task<List<OrderDto>> GetOrdersAsync(int pageSize, int pageNumber)
         {
-            var orders = await _repositoryManager.OrderRepository.GetOrdersAsync(pageSize, pageNumber);
+            if (pageSize < 1 || pageSize > 100 || pageNumber < 1)
+                throw new BadRequestException("Invalid page size or page number.");
+
+            List<Order> orders = await _repositoryManager.OrderRepository.GetOrdersAsync(pageSize, pageNumber);
 
             return _mapper.Map<List<OrderDto>>(orders);
         }
 
         public async Task<OrderDto> GetOrderByIdAsync(int orderId)
         {
-            var order = await GetOrderAndCheckIfExists(orderId);
+            Order order = await GetOrderAndCheckIfExists(orderId);
 
             return _mapper.Map<OrderDto>(order);
         }
 
         public async Task<OrderDto> CreateOrderAsync(OrderForCreationDto orderForCreationDto)
         {
-            var order = _mapper.Map<Order>(orderForCreationDto);
+            Order order = _mapper.Map<Order>(orderForCreationDto);
 
             _repositoryManager.OrderRepository.CreateOrder(order);
 
@@ -41,11 +44,11 @@ namespace Services
             return _mapper.Map<OrderDto>(order);
         }
 
-        public async Task<IEnumerable<OrderDetailDto>> CreateOrderDetailsByOrderIdAsync(int orderId, IEnumerable<OrderDetailForCreationDto> orderDetailForCreationDto)
+        public async Task<List<OrderDetailDto>> CreateOrderDetailsByOrderIdAsync(int orderId, IEnumerable<OrderDetailForCreationDto> orderDetailForCreationDto)
         {
-            var order = await GetOrderAndCheckIfExists(orderId);
+            Order order = await GetOrderAndCheckIfExists(orderId);
 
-            var orderDetails = _mapper.Map<IEnumerable<OrderDetail>>(orderDetailForCreationDto);
+            List<OrderDetail> orderDetails = _mapper.Map<List<OrderDetail>>(orderDetailForCreationDto);
 
             foreach(var orderDetail in orderDetails)
             {
@@ -54,12 +57,12 @@ namespace Services
 
             await _repositoryManager.SaveAsync();
 
-            return _mapper.Map<IEnumerable<OrderDetailDto>>(orderDetails);
+            return _mapper.Map<List<OrderDetailDto>>(orderDetails);
         }
 
         public async Task DeleteOrderByIdAsync(int orderId)
         {
-            var order = await GetOrderAndCheckIfExists(orderId);
+            Order order = await GetOrderAndCheckIfExists(orderId);
 
             _repositoryManager.OrderRepository.DeleteOrder(order);
 
@@ -68,7 +71,7 @@ namespace Services
 
         private async Task<Order> GetOrderAndCheckIfExists(int orderId)
         {
-            var order = await _repositoryManager.OrderRepository.GetOrderByIdAsync(orderId);
+            Order order = await _repositoryManager.OrderRepository.GetOrderByIdAsync(orderId);
 
             if (order == null)
                 throw new NotFoundException($"Order with id {orderId} not found");

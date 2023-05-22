@@ -13,6 +13,7 @@ namespace RefactoringChallenge
 
             CreateMap<OrderDetail, OrderDetailDto>();
 
+            //This part should be done in the db as a default value, but for now I have kept it here
             CreateMap<OrderForCreationDto, Order>()
                 .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ForMember(dest => dest.OrderId, opt => opt.Ignore())
