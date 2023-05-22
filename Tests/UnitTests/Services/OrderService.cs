@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using RefactoringChallenge;
 using Entities.Exceptions;
 using Tests.UnitTests.Helpers;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 //I am using an in memory db here for the tests, but there are limitations to this approach, and it is not something I would want in a full production app long-term.
 //For a real test setup I would likely push for either a docker container or a a real db of some kind.
@@ -48,26 +49,36 @@ namespace Tests.UnitTests.Services
             _repositoryContext.Dispose();
         }
 
-        [Fact]
-        public async Task GetOrdersAsync_ValidPageParameters_ReturnsListOfOrders()
+        [Theory]
+        [InlineData(2, 1)]
+        [InlineData(1, 2)]
+        [InlineData(1, 1)]
+        public async Task GetOrdersAsync_ValidPageParameters_ReturnsListOfOrders(int pageSize, int pageNumber)
         {
-            const int pageSize = 2;
-            const int pageNumber = 1;
-
             List<OrderDto> result = await _service.GetOrdersAsync(pageSize, pageNumber);
 
-            Assert.Equal(2, result.Count);
+            Assert.Equal(pageSize, result.Count);
+        }
+
+        [Fact]
+        public async Task GetOrdersAsync_TooLargePageParameters_ReturnsEmptyList()
+        {
+            const int pageSize = 10;
+            const int pageNumber = 10;
+
+            var results = await _service.GetOrdersAsync(pageSize, pageNumber);          
+            
+            Assert.Empty(results);
         }
 
         [Theory]
         [InlineData(0, 1)]
         [InlineData(101, 1)]
         [InlineData(1, 0)]
-        public async Task GetOrdersAsync_ThrowsBadRequestException_WhenInvalidPageSizeOrPageNumber(int pageSize, int pageNumber)
+        public async Task GetOrdersAsync_InvalidPageSizeOrPageNumber_ThrowsBadRequestException(int pageSize, int pageNumber)
         {
             await Assert.ThrowsAsync<BadRequestException>(() => _service.GetOrdersAsync(pageSize, pageNumber));
         }
-
 
         [Fact]
         public async Task GetOrderByIdAsync_ReturnsOrderDto()
@@ -81,11 +92,11 @@ namespace Tests.UnitTests.Services
         }
 
         [Fact]
-        public async Task GetOrderAndCheckIfExists_ThrowsNotFoundException()
+        public async Task GetOrderAndCheckIfExists_InvalidOrderId_ThrowsNotFoundException()
         {
-            const int notFoundOrderId = 100;
+            const int invalidOrderId = 100;
 
-            await Assert.ThrowsAsync<NotFoundException>(() => _service.GetOrderByIdAsync(notFoundOrderId));
+            await Assert.ThrowsAsync<NotFoundException>(() => _service.GetOrderByIdAsync(invalidOrderId));
         }
 
         [Fact]
