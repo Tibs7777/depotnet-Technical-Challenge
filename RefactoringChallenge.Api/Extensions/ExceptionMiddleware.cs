@@ -31,7 +31,8 @@ namespace RefactoringChallenge.Extensions
                     await context.Response.WriteAsync(new ErrorDetails()
                     {
                         StatusCode = context.Response.StatusCode,
-                        Message = contextFeature.Error.Message
+                        Message = context.Response.StatusCode == StatusCodes.Status500InternalServerError 
+                            ? "Internal Server Error" : contextFeature.Error.Message
                     }.Serialize());
                 });
             });

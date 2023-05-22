@@ -1,6 +1,6 @@
 ﻿namespace Shared.DataTransferObjects
 {
-    public class OrderDetailDto
+    public record OrderDetailDto
     {
         public int OrderId { get; set; }
         public int ProductId { get; set; }

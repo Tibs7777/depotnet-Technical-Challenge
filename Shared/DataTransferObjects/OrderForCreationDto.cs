@@ -1,7 +1,7 @@
 ﻿using Shared.DataTransferObjects;
 using System.ComponentModel.DataAnnotations;
 
-public class OrderForCreationDto
+public record OrderForCreationDto
 {
     [MaxLength(5, ErrorMessage = "CustomerId must not exceed 5 characters.")]
     [MinLength(5, ErrorMessage = "CustomerId must be 5 characters.")]

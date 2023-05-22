@@ -2,7 +2,7 @@
 
 namespace Shared.DataTransferObjects
 {
-    public class OrderDetailForCreationDto
+    public record OrderDetailForCreationDto
     {
         [Required(ErrorMessage = "ProductId is required.")]
         public int ProductId { get; set; }
