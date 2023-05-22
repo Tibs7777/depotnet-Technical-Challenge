@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace RefactoringChallenge.Extensions
 {
-    public static class ApplicationBuilderExtensions
+    public static class ExceptionExtensions
     {
         public static void UseCustomExceptionHandler(this IApplicationBuilder app)
         {

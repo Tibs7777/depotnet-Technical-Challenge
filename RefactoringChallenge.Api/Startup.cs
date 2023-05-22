@@ -57,8 +57,10 @@ namespace RefactoringChallenge
                 app.UseSwaggerUI();
             }
 
-            if (app.Environment.IsProduction())
+            if(env.IsProduction())
+            {
                 app.UseHsts();
+            }
 
             app.UseHttpsRedirection();
 

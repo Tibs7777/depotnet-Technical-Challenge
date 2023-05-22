@@ -1,15 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Services.Contracts;
 using Shared.DataTransferObjects;
 using Shared.Paging;
 
-namespace RefactoringChallenge.Controllers
+namespace Presentation.Controllers
 {
     [ApiController]
     [Route("/api/[controller]")]
-    public class OrdersController : Controller
+    public class OrdersController : ControllerBase
     {
         private readonly IOrderService _orderService;
 
