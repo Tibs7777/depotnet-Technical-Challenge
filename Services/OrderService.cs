@@ -71,7 +71,7 @@ namespace Services
 
         private async Task<Order> GetOrderAndCheckIfExists(int orderId)
         {
-            Order order = await _repositoryManager.OrderRepository.GetOrderByIdAsync(orderId);
+            Order? order = await _repositoryManager.OrderRepository.GetOrderByIdAsync(orderId);
 
             if (order == null)
                 throw new NotFoundException($"Order with id {orderId} not found");
