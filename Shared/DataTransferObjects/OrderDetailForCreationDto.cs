@@ -4,7 +4,7 @@ namespace Shared.DataTransferObjects
 {
     public class OrderDetailForCreationDto
     {
-        [Required(ErrorMessage = "ProductId isarequired.")]
+        [Required(ErrorMessage = "ProductId is required.")]
         public int ProductId { get; set; }
 
         [Required(ErrorMessage = "UnitPrice is required.")]
