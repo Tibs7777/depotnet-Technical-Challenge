@@ -8,11 +8,9 @@ using RefactoringChallenge;
 using Entities.Exceptions;
 using Tests.UnitTests.Helpers;
 
-//A quick word on testing since it was mentioned so much:
-
-//I've only included unit tests in this challenge. I think Integration tests might be outside the scope of it (especially since unit tests were mentioned by name)
-//I'd also rather look to a more robust process for integration testing than simply using in-memory databases due to their limitations, which is what I would do here if needed.
-//I've not tested the repository layer, as for these kinds of tests, it's a bit too simple, and would also be covered by the integration tests.
+//I am using an in memory db here for the tests, but there are limitations to this approach, and it is not something I would want in a full production app long-term.
+//For a real test setup I would likely push for either a docker container or a a real db of some kind.
+//In memory struggles with certain types of queries and is not a true representation of a real db.
 
 namespace Tests.UnitTests.Services
 {
