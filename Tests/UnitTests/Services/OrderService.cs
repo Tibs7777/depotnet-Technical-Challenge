@@ -2,7 +2,8 @@
 using AutoMapper;
 using Entities.Models;
 using Shared.DataTransferObjects;
-using Services;using Repository;
+using Services;
+using Repository;
 using Microsoft.EntityFrameworkCore;
 using RefactoringChallenge;
 using Entities.Exceptions;
